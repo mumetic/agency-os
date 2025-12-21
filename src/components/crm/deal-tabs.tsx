@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, CheckCircle2, Circle, Phone, Users, Mail, Bell, FileText } from 'lucide-react';
+import { Phone, Users, Mail, Bell, FileText } from 'lucide-react';
 import DealItemsManager from './deal-items-manager';
+import DealActivitiesManager from './deal-activities-manager';
 
 interface DealItem {
   id: string;
@@ -53,30 +54,23 @@ interface Props {
   dealItems: DealItem[];
   activities: Activity[];
   servicePackages: ServicePackage[];
+  users: User[];
 }
 
-export default function DealTabs({ deal, dealItems, activities, servicePackages }: Props) {
-  const getActivityIcon = (type: string | null) => {
-    switch (type) {
-      case 'call':
-        return <Phone className="h-5 w-5" />;
-      case 'meeting':
-        return <Users className="h-5 w-5" />;
-      case 'email':
-        return <Mail className="h-5 w-5" />;
-      case 'follow_up':
-        return <Bell className="h-5 w-5" />;
-      default:
-        return <FileText className="h-5 w-5" />;
-    }
-  };
+interface User {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
+export default function DealTabs({ deal, dealItems, activities, servicePackages, users }: Props) {
 
   return (
     <Tabs defaultValue="details" className="space-y-4">
       <TabsList>
         <TabsTrigger value="details">Detalles</TabsTrigger>
         <TabsTrigger value="items">
-          Items
+          Servicios y Productos
           {dealItems.length > 0 && (
             <Badge variant="secondary" className="ml-2">
               {dealItems.length}
@@ -143,72 +137,11 @@ export default function DealTabs({ deal, dealItems, activities, servicePackages 
 
       {/* Tab: Actividades */}
       <TabsContent value="activities">
-        <Card>
-          <CardHeader>
-            <CardTitle>Historial de actividades</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {activities.length > 0 ? (
-              <div className="space-y-4">
-                {activities.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="flex gap-4 pb-4 border-b last:border-0 last:pb-0"
-                  >
-                    <div className="flex-shrink-0 text-muted-foreground">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-start justify-between">
-                        <h4 className="font-medium">{activity.subject}</h4>
-                        {activity.completed_at ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </div>
-                      {activity.description && (
-                        <p className="text-sm text-muted-foreground">
-                          {activity.description}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        {activity.owner && (
-                          <span>
-                            {activity.owner.first_name} {activity.owner.last_name}
-                          </span>
-                        )}
-                        {activity.scheduled_at && (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(activity.scheduled_at).toLocaleDateString(
-                              'es-ES',
-                              {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                              }
-                            )}
-                          </div>
-                        )}
-                        <span>
-                          {formatDistanceToNow(new Date(activity.date_created), {
-                            addSuffix: true,
-                            locale: es,
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No hay actividades registradas
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <DealActivitiesManager 
+          dealId={deal.id}
+          activities={activities}
+          users={users}
+        />
       </TabsContent>
 
       {/* Tab: Notas */}

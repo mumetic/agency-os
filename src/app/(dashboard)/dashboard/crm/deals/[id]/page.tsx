@@ -1,5 +1,5 @@
 import { directusServer } from '@/lib/directus';
-import { readItem, readItems } from '@directus/sdk';
+import { readItem, readItems, readUsers } from '@directus/sdk';
 import { notFound } from 'next/navigation';
 import DealHeader from '@/components/crm/deal-header';
 import DealTabs from '@/components/crm/deal-tabs';
@@ -83,6 +83,17 @@ export default async function DealDetailPage({ params }: DealDetailPageProps) {
       })
     );
 
+    const users = await directusServer.request(
+      readUsers({
+        fields: ['id', 'first_name', 'last_name'],
+        filter: {
+          status: {
+            _eq: 'active',
+          },
+        },
+      })
+    );
+
     return (
       <div className="space-y-6">
         <Button variant="ghost" size="sm" asChild>
@@ -99,6 +110,7 @@ export default async function DealDetailPage({ params }: DealDetailPageProps) {
           dealItems={dealItems as any}
           activities={activities as any}
           servicePackages={servicePackages as any}
+          users={users as any}
         />
       </div>
     );
